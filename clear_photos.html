@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fotolari Temizle</title>
+<style>
+body{font-family:Arial,sans-serif;background:#fff8f9;color:#5a2d3a;padding:24px;text-align:center}
+h2{color:#e8748a;margin-bottom:12px}
+p{font-size:14px;color:#c98a96;margin-bottom:24px}
+.btn{background:linear-gradient(135deg,#e8748a,#b84d63);color:white;border:none;border-radius:50px;padding:16px 40px;font-size:16px;cursor:pointer;margin-bottom:12px}
+.btn:active{opacity:.85}
+#log{background:white;border:1px solid #fce4ec;border-radius:12px;padding:16px;font-size:14px;margin-top:16px;min-height:50px}
+.ok{color:#4caf50;font-weight:bold}
+.err{color:#e53935;font-weight:bold}
+</style>
+</head>
+<body>
+<h2>🗑️ Fotoğraf Listesini Temizle</h2>
+<p>JSONBin'deki fotoğraf listesini sıfırlar.<br>Butona bas, sonra uygulamayı kapatıp aç.</p>
+<button class="btn" onclick="clearPhotos()">Fotoğraf Listesini Temizle</button>
+<div id="log">Hazır.</div>
+<script>
+var KEY = '$2a$10$PIe3XWqcFRFaiDOQDJLZFOpHqkIZX2tXbrPQR4Z5nKf7SvjB2f7Su';
+var BIN = '69dc0b82856a682189282ba4';
+
+function clearPhotos(){
+  document.getElementById('log').textContent = 'Temizleniyor...';
+  // Get current data
+  fetch('https://api.jsonbin.io/v3/b/'+BIN+'/latest',{headers:{'X-Master-Key':KEY}})
+  .then(function(r){return r.json();})
+  .then(function(j){
+    var d = j.record || {};
+    d.photos = [];  // fotoğraf listesini boşalt
+    // localStorage da temizle
+    localStorage.removeItem('ilayda_photos');
+    return fetch('https://api.jsonbin.io/v3/b/'+BIN,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':KEY},
+      body:JSON.stringify(d)
+    });
+  })
+  .then(function(r){
+    if(r.ok){
+      document.getElementById('log').innerHTML = '<span class="ok">✅ Fotoğraf listesi temizlendi!<br>Şimdi uygulamayı kapatıp aç → Anılarımız boş gelecek → Yeniden ekleyebilirsin.</span>';
+    } else {
+      return r.text().then(function(t){
+        document.getElementById('log').innerHTML = '<span class="err">Hata: '+t+'</span>';
+      });
+    }
+  })
+  .catch(function(e){
+    document.getElementById('log').innerHTML = '<span class="err">Bağlantı hatası: '+e.message+'</span>';
+  });
+}
+</script>
+</body>
+</html>
